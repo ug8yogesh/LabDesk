@@ -17,15 +17,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS
   }
 });
-pool.getConnection((err, connection) => {
-  if (err) {
-    console.error('DATABASE ERROR:', err);
-    process.exit(1);
-  }
 
-  console.log('Database connected successfully');
-  connection.release();
-});
 
 // ─── MYSQL CONNECTION POOL ────────────────────────────────────────────────────
 const pool = mysql.createPool({
@@ -33,6 +25,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'lab_fault_system',
+  port: process.env.DB_PORT || 3306,
   waitForConnections: true,
   connectionLimit: 10,
 });
