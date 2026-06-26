@@ -672,7 +672,7 @@ const PORT = process.env.PORT || 3000;
     console.log('✅ MySQL connected successfully');
     await seedUsers();
     await seedSolutions();
-    app.listen(PORT, () => console.log(`🚀 Lab Fault System running on http://localhost:${PORT}`));
+    app.listen(PORT, () => console.log(`🚀 Lab Fault System running on Port ${PORT}`));
   } catch (err) {
     console.error('❌ MySQL connection failed:', err.message);
     console.error('   Make sure XAMPP MySQL is running and the database "lab_fault_system" exists.');
