@@ -46,6 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 if (!process.env.SESSION_SECRET) {
   console.warn('⚠️  WARNING: SESSION_SECRET is not set in .env — using an insecure fallback. Set it before going to production.');
 }
+app.set('trust proxy', 1); // Trust Render's proxy for secure cookies
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-fallback-secret-change-me',
   resave: false,
@@ -312,7 +313,8 @@ app.post('/api/auth/forgot-password', async (req, res) => {
       return res.status(500).json({ error: 'Password reset not configured' });
     }
 
-    const resetLink = `http://localhost:${process.env.PORT || 3000}/frontend/reset-password.html?token=${token}`;
+    const baseUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const resetLink = `${baseUrl}/frontend/reset-password.html?token=${token}`;
     // ✅ ADD THIS TRY-CATCH (IMPORTANT)
     try {
       await transporter.sendMail({
