@@ -1,0 +1,19 @@
+{
+  "name": "lab-fault-system",
+  "version": "1.0.0",
+  "description": "Computer Lab Fault Reporting and Resolution System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "express-session": "^1.17.3",
+    "mysql2": "^3.20.0",
+    "nodemailer": "^8.0.5"
+  }
+}

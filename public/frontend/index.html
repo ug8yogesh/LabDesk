@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Lab Fault Reporting System</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/frontend/css/style.css">
+</head>
+<body>
+<div id="app">
+ 
+<!-- ══════════════════════ LOGIN PAGE ══════════════════════ -->
+<div id="page-auth" class="page active">
+    <div class="auth-bg">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="logo-icon">🖥️</div>
+                <h1>Computer Lab Fault Reporting<br>Resolution System</h1>
+                <p>Smart fault management for your computer lab</p>
+            </div>
+            <div id="auth-alert"></div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('login', this)">Sign In</div>
+                <div class="auth-tab" onclick="switchAuthTab('register', this)">Register</div>
+            </div>
+ 
+            <!-- ══ LOGIN FORM ══ -->
+            <div id="login-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                <div style="text-align:right; margin-top:6px; margin-bottom:16px;">
+                    <a href="#" onclick="showForgotPassword()" style="text-decoration: none; color:#94a3b8; cursor: pointer;">Forgot Password?</a>
+</div>
+                <button class="btn btn-primary" onclick="doLogin()" id="login-btn">Sign In →</button>
+                
+            </div>
+ 
+            <!-- ══ FORGOT PASSWORD FORM ══ -->
+            <div id="forgot-form" style="display:none">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="forgot-email" placeholder="Enter your email">
+                </div>
+                <button class="btn btn-primary" onclick="sendResetLink()">Send Reset Link →</button>
+                <div style="margin-top:10px; text-align:center;">
+                    <a href="#" onclick="backToLogin()" style="text-decoration: none; color: #94a3b8; cursor: pointer;">← Back to Login</a>
+                </div>
+            </div>
+
+            <!-- ══ REGISTER FORM ══ -->
+            <div id="register-form" style="display:none">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="reg-name" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Student ID</label>
+                    <input type="text" id="reg-sid" placeholder="e.g. STU2024001">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-pass" placeholder="Set password">
+                    <p id="password-error" style="color: red; font-size: 13px; margin-top: 5px;"></p>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="reg-confirm-pass" placeholder="Re-enter your password">
+                    <p id="confirm-password-error" style="color: red; font-size: 13px; margin-top: 5px;"></p>
+                </div>
+                
+                <button class="btn btn-primary" onclick="doRegister()">Create Account →</button>
+            </div>
+ 
+        </div>
+    </div>
+</div>
+ 
+<!-- ══════════════════════ STUDENT DASHBOARD ══════════════════════ -->
+<div id="page-student" class="page">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+    <div class="dashboard">
+        <nav class="sidebar" id="student-sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-mark">
+                    <div class="icon">🖥️</div>
+                    <div class="text">Lab Fault System<span>Student Portal</span></div>
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-label">Menu</div>
+                    <div class="nav-item active" onclick="showStudentView('dashboard', this)"><span class="icon">📊</span> Dashboard</div>
+                    <div class="nav-item" onclick="showStudentView('report', this)"><span class="icon">📝</span> Report Fault</div>
+                    <div class="nav-item" onclick="showStudentView('myreports', this)"><span class="icon">📋</span> My Reports</div>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="student-avatar">S</div>
+                    <div><div class="user-name" id="student-name">Student</div><div class="user-role">Student</div></div>
+                </div>
+                <div class="nav-item" onclick="doLogout()"><span class="icon">🚪</span> Sign Out</div>
+            </div>
+        </nav>
+        <main class="main-content">
+            <div class="topbar">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <button class="mobile-menu-btn" onclick="openSidebar('student-sidebar')">☰</button>
+                    <div class="topbar-title" id="student-view-title">Dashboard</div>
+                </div>
+                <div class="topbar-actions">
+                    <button class="notif-btn" onclick="toggleNotifPanel()" id="notif-btn-student">
+                        🔔 <span class="notif-dot" id="notif-dot-student" style="display:none"></span>
+                    </button>
+                </div>
+            </div>
+ 
+            <!-- Student Dashboard -->
+            <div id="sv-dashboard" style="display:none">
+                <div class="stats-grid" id="student-stats"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div><span class="card-title">Recent Fault Reports</span></div>
+                        <button class="btn btn-ghost btn-sm" onclick="showStudentView('report', null)">+ New Report</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>ID</th><th>Lab</th><th>Computer</th><th>Type</th><th>Status</th><th>Date</th></tr></thead>
+                            <tbody id="student-recent-faults"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- Report Fault -->
+            <div id="sv-report" style="display:none">
+                <div class="card" style="max-width:620px">
+                    <div class="card-header"><span class="card-title">Submit Fault Report</span></div>
+                    <div id="report-alert"></div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Lab Name</label>
+                            <select id="r-lab">
+                                <option value="">Select Lab</option>
+                                <option>Computer Lab 1</option><option>Computer Lab 2</option>
+                                <option>Computer Lab 3</option><option>Network Lab</option>
+                                <option>Software Lab</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Computer Number</label>
+                            <input type="text" id="r-comp" placeholder="e.g. PC-05">
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Fault Type</label></div>
+                    <div class="fault-type-grid">
+                        <div class="fault-type-card" id="ft-software" onclick="selectFaultType('software')">
+                            <div class="icon">💻</div>
+                            <h4>Software Fault</h4>
+                            <p>OS, apps, network, browser issues</p>
+                        </div>
+                        <div class="fault-type-card" id="ft-hardware" onclick="selectFaultType('hardware')">
+                            <div class="icon">🔧</div>
+                            <h4>Hardware Fault</h4>
+                            <p>Monitor, keyboard, mouse, cables</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Problem Description</label>
+                        <textarea id="r-desc" placeholder="Describe the problem in detail — what happens, when it started, any error messages..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="report-submit-btn" onclick="handleReportAction()">Submit Fault Report →</button>
+                </div>
+            </div>
+ 
+            <!-- ══ RESOLUTION PAGE ══ -->
+            <div id="sv-resolution" style="display:none">
+                <div class="resolution-header-bar">
+                    <div>
+                        <div class="topbar-title">🔍 Find a Resolution</div>
+                        <div style="font-size:13px;color:var(--muted);margin-top:4px">Follow the steps below to resolve your software issue</div>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="showStudentView('report', null)">← Back to Report</button>
+                </div>
+ 
+                <!-- Search + Filter bar -->
+                <div class="resolution-controls">
+                    <div class="search-bar" style="flex:1">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="res-search" placeholder="Search for a solution..." oninput="filterResolutions()" style="width:100%">
+                    </div>
+                    <select id="res-category-filter" onchange="filterResolutions()" style="background:var(--navy-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;color:var(--white);font-family:inherit;font-size:13px;outline:none;cursor:pointer;min-width:180px">
+                        <option value="">📂 All Categories</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" id="show-all-btn" onclick="toggleShowAll(this)" style="white-space:nowrap">Show All Solutions</button>
+                </div>
+ 
+                <!-- Auto-matched suggestions -->
+                <div id="res-matched-section" style="display:none">
+                    <div class="category-label" style="margin-bottom:12px">⚡ Suggested for your problem</div>
+                    <div id="res-matched-list"></div>
+                    <div class="divider"></div>
+                </div>
+ 
+                <!-- All / Filtered solutions -->
+                <div id="res-all-section">
+                    <div class="category-label" style="margin-bottom:12px" id="res-all-label">💡 All Solutions</div>
+                    <div id="res-all-list"></div>
+                </div>
+ 
+                <!-- Problem not solved — submit to admin -->
+                <div class="card" id="res-escalate-card" style="margin-top:24px;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.04)">
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                        <div style="font-size:32px">😕</div>
+                        <div style="flex:1">
+                            <div style="font-weight:700;font-size:15px;margin-bottom:4px">Couldn't find a solution?</div>
+                            <div style="font-size:13px;color:var(--muted)">If none of the steps above solved your problem, submit a report and our admin will assign a technician to help you.</div>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="escalateToAdmin()" style="white-space:nowrap">Submit to Admin →</button>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- My Reports -->
+            <div id="sv-myreports" style="display:none">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">My Fault Reports</span>
+                        <div class="filter-row" style="margin:0">
+                            <button class="filter-chip active" onclick="filterMyFaults('all', this)">All</button>
+                            <button class="filter-chip" onclick="filterMyFaults('open', this)">Open</button>
+                            <button class="filter-chip" onclick="filterMyFaults('in_progress', this)">In Progress</button>
+                            <button class="filter-chip" onclick="filterMyFaults('closed', this)">Closed</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>ID</th><th>Lab</th><th>Computer</th><th>Type</th><th>Description</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                            <tbody id="my-faults-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- Solutions Library -->
+            <div id="sv-solutions" style="display:none">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="search-bar">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="solutions-search" placeholder="Search solutions..." oninput="filterSolutions()">
+                        </div>
+                    </div>
+                    <div id="solutions-container"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+ 
+<!-- ══════════════════════ ADMIN DASHBOARD ══════════════════════ -->
+<div id="page-admin" class="page">
+    <div class="sidebar-overlay" id="admin-sidebar-overlay" onclick="closeSidebar()"></div>
+    <div class="dashboard">
+        <nav class="sidebar" id="admin-sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-mark">
+                    <div class="icon">⚙️</div>
+                    <div class="text">Lab Fault System<span>Admin Portal</span></div>
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-label">Management</div>
+                    <div class="nav-item active" onclick="showAdminView('dashboard', this)"><span class="icon">📊</span> Dashboard</div>
+                    <div class="nav-item" onclick="showAdminView('faults', this)"><span class="icon">🔴</span> All Faults</div>
+                    <div class="nav-item" onclick="showAdminView('technicians', this)"><span class="icon">👷</span> Technicians</div>
+                    <div class="nav-item" onclick="showAdminView('feedback', this)"><span class="icon">⭐</span> Feedback</div>
+                    <div class="nav-item" onclick="showAdminView('solutions', this)"><span class="icon">💡</span> Solutions Manager</div>
+                    <div class="nav-item" onclick="showAdminView('dbviewer', this)"><span class="icon">🗄️</span> Database Viewer</div>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" style="background:linear-gradient(135deg,#e8a045,#2dd4bf)">A</div>
+                    <div><div class="user-name">Admin</div><div class="user-role">Administrator</div></div>
+                </div>
+                <div class="nav-item" onclick="doLogout()"><span class="icon">🚪</span> Sign Out</div>
+            </div>
+        </nav>
+        <main class="main-content">
+            <div class="topbar">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <button class="mobile-menu-btn" onclick="openSidebar('admin-sidebar')">☰</button>
+                    <div class="topbar-title" id="admin-view-title">Dashboard</div>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-ghost btn-sm" onclick="exportFaults()" id="export-btn" style="display:none">📥 Export CSV</button>
+                    <button class="notif-btn" onclick="toggleNotifPanel()" id="notif-btn-admin">
+                        🔔 <span class="notif-dot" id="notif-dot-admin" style="display:none"></span>
+                    </button>
+                </div>
+            </div>
+            <div id="av-dashboard">
+                <div class="stats-grid" id="admin-stats-grid"></div>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">📈 Fault Trend (7 days)</span></div>
+                        <div id="trend-chart" style="padding:8px 0"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">🏛️ Top Faulty Labs</span></div>
+                        <div id="top-labs"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">All Faults Requiring Attention</span></div>
+                    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Student</th><th>Lab</th><th>Computer</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="admin-hw-faults"></tbody></table></div>
+                </div>
+            </div>
+            <div id="av-faults" style="display:none">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">All Fault Reports</span>
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                            <div class="search-bar">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" id="fault-search" placeholder="Search faults..." oninput="loadAllFaults()">
+                            </div>
+                            <select id="fault-status-filter" onchange="loadAllFaults()" style="background:var(--navy-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--white);font-family:inherit;font-size:12px;outline:none;cursor:pointer">
+                                <option value="">All Status</option>
+                                <option value="open">Open</option>
+                                <option value="assigned">Assigned</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                            <select id="fault-type-filter" onchange="loadAllFaults()" style="background:var(--navy-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--white);font-family:inherit;font-size:12px;outline:none;cursor:pointer">
+                                <option value="">All Types</option>
+                                <option value="hardware">Hardware</option>
+                                <option value="software">Software</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Student</th><th>Lab</th><th>Type</th><th>Description</th><th>Status</th><th>Technician</th><th>Date</th><th>Action</th></tr></thead><tbody id="admin-all-faults"></tbody></table></div>
+                </div>
+            </div>
+            <div id="av-technicians" style="display:none">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Technician Overview</span></div>
+                    <div id="tech-cards-container"></div>
+                </div>
+            </div>
+            <div id="av-feedback" style="display:none">
+                <div class="card" id="feedback-summary-card">
+                    <div class="card-header"><span class="card-title">⭐ Feedback Summary</span></div>
+                    <div id="feedback-summary"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">All Student Feedback</span></div>
+                    <div class="table-wrap"><table><thead><tr><th>Fault #</th><th>Student</th><th>Lab</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead><tbody id="feedback-table"></tbody></table></div>
+                </div>
+            </div>
+            <!-- Solutions Manager -->
+            <div id="av-solutions" style="display:none">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+                    <div>
+                        <div style="font-size:14px;color:var(--muted)">Add, edit or delete self-help solutions for students</div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="openSolutionModal(null)" style="width:auto">+ Add Solution</button>
+                </div>
+                <div class="card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>#</th><th>Category</th><th>Problem</th><th>Solution</th><th>Steps</th><th>Actions</th></tr></thead>
+                            <tbody id="solutions-admin-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+ 
+            <div id="av-dbviewer" style="display:none">
+                <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Live view of all data stored in the MySQL database.</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="db-tabs">
+                    <button class="btn btn-primary btn-sm" onclick="showDbTable('users', this)" style="width:auto">👤 Users</button>
+                    <button class="btn btn-ghost btn-sm" onclick="showDbTable('fault_reports', this)">📋 Fault Reports</button>
+                    <button class="btn btn-ghost btn-sm" onclick="showDbTable('technician_tasks', this)">🔧 Technician Tasks</button>
+                    <button class="btn btn-ghost btn-sm" onclick="showDbTable('software_solutions', this)">💡 Software Solutions</button>
+                    <button class="btn btn-ghost btn-sm" onclick="showDbTable('notifications', this)">🔔 Notifications</button>
+                    <button class="btn btn-ghost btn-sm" onclick="showDbTable('feedback', this)">⭐ Feedback</button>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" id="db-table-title">Select a Table</span>
+                        <span id="db-row-count" style="font-size:12px;color:var(--muted)"></span>
+                    </div>
+                    <div class="table-wrap" id="db-table-container">
+                        <div class="empty-state"><div class="icon">🗄️</div><p>Select a table above to view data</p></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+ 
+<!-- ══════════════════════ TECHNICIAN DASHBOARD ══════════════════════ -->
+<div id="page-technician" class="page">
+    <div class="sidebar-overlay" id="tech-sidebar-overlay" onclick="closeSidebar()"></div>
+    <div class="dashboard">
+        <nav class="sidebar" id="tech-sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-mark">
+                    <div class="icon">🔧</div>
+                    <div class="text">Lab Fault System<span>Technician Portal</span></div>
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-label">Work</div>
+                    <div class="nav-item active" onclick="showTechView('tasks', this)"><span class="icon">📋</span> My Tasks <span class="nav-badge" id="pending-badge" style="display:none">0</span></div>
+                    <div class="nav-item" onclick="showTechView('history', this)"><span class="icon">📜</span> Work History</div>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" style="background:linear-gradient(135deg,#2dd4bf,#3b82f6)">T</div>
+                    <div><div class="user-name" id="tech-name">Technician</div><div class="user-role">Technician</div></div>
+                </div>
+                <div class="nav-item" onclick="doLogout()"><span class="icon">🚪</span> Sign Out</div>
+            </div>
+        </nav>
+        <main class="main-content">
+            <div class="topbar">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <button class="mobile-menu-btn" onclick="openSidebar('tech-sidebar')">☰</button>
+                    <div class="topbar-title" id="tech-view-title">My Tasks</div>
+                </div>
+                <div class="topbar-actions">
+                    <button class="notif-btn" onclick="toggleNotifPanel()" id="notif-btn-tech">
+                        🔔 <span class="notif-dot" id="notif-dot-tech" style="display:none"></span>
+                    </button>
+                </div>
+            </div>
+            <div id="tv-tasks"><div id="tech-tasks-container"></div></div>
+            <div id="tv-history" style="display:none">
+                <div class="card">
+                    <div class="card-header">
+                        <div><span class="card-title">Completed Work History</span></div>
+                        <div id="tech-stats-mini" style="font-size:13px;color:var(--muted)"></div>
+                    </div>
+                    <div class="table-wrap"><table><thead><tr><th>Task ID</th><th>Fault #</th><th>Lab</th><th>Computer</th><th>Problem Found</th><th>Solution Applied</th><th>Completed</th></tr></thead><tbody id="tech-history-table"></tbody></table></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+ 
+<!-- ══════════════════════ NOTIFICATIONS PANEL ══════════════════════ -->
+<div id="notif-panel" class="notif-panel">
+    <div class="notif-header">
+        <h3>Notifications</h3>
+        <button class="btn btn-ghost btn-sm" onclick="toggleNotifPanel()">✕</button>
+    </div>
+    <div id="notif-list" style="flex:1"></div>
+</div>
+ 
+<!-- ══════════════════════ MODALS ══════════════════════ -->
+<div class="modal-overlay" id="modal-assign">
+    <div class="modal">
+        <h3>Assign Technician</h3>
+        <div id="assign-fault-info" class="alert alert-info" style="margin-bottom:20px;"></div>
+        <div class="form-group">
+            <label>Select Technician</label>
+            <select id="assign-tech-select"></select>
+        </div>
+        <div id="tech-workload-info" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-assign')">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="confirmAssign()" style="width:auto;">Assign Technician →</button>
+        </div>
+    </div>
+</div>
+ 
+<div class="modal-overlay" id="modal-complete">
+    <div class="modal">
+        <h3>Mark Task as Completed</h3>
+        <div class="form-group">
+            <label>Problem Found</label>
+            <textarea id="comp-problem" placeholder="Describe what hardware issue you found..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Solution Applied</label>
+            <textarea id="comp-solution" placeholder="Describe how you fixed the problem..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-complete')">Cancel</button>
+            <button class="btn btn-success btn-sm" onclick="confirmComplete()">✓ Mark Completed</button>
+        </div>
+    </div>
+</div>
+ 
+<div class="modal-overlay" id="modal-feedback">
+    <div class="modal">
+        <h3>⭐ Rate the Resolution</h3>
+        <p style="color:var(--muted); font-size:13px; margin-bottom:24px; line-height:1.6;">How satisfied are you with the resolution of your fault report?</p>
+        <div class="form-group">
+            <label>Your Rating</label>
+            <div class="star-rating" id="star-rating">
+                <span class="star" onclick="setRating(1)" data-v="1">★</span>
+                <span class="star" onclick="setRating(2)" data-v="2">★</span>
+                <span class="star" onclick="setRating(3)" data-v="3">★</span>
+                <span class="star" onclick="setRating(4)" data-v="4">★</span>
+                <span class="star" onclick="setRating(5)" data-v="5">★</span>
+            </div>
+            <div id="rating-label" style="font-size:12px;color:var(--muted);margin-top:8px;"></div>
+        </div>
+        <div class="form-group">
+            <label>Comment (optional)</label>
+            <textarea id="feedback-comment" placeholder="Share your experience..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-feedback')">Skip</button>
+            <button class="btn btn-primary btn-sm" onclick="submitFeedback()" style="width:auto;">Submit Feedback →</button>
+        </div>
+    </div>
+</div>
+ 
+<!-- Problem Solved Modal -->
+<div class="modal-overlay" id="modal-solved">
+    <div class="modal" style="text-align:center;max-width:420px">
+        <div style="font-size:64px;margin-bottom:16px">🎉</div>
+        <h3 style="margin-bottom:12px">Problem Solved!</h3>
+        <p style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:24px">Great job fixing it yourself! Your issue has been marked as resolved. No further action needed.</p>
+        <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius-sm);padding:14px;margin-bottom:24px;font-size:13px;color:#86efac">
+            ✅ Resolved by student — no admin intervention required
+        </div>
+        <button class="btn btn-success" onclick="closeModal('modal-solved');showStudentView('dashboard',null)" style="width:auto;padding:10px 28px">Back to Dashboard</button>
+    </div>
+</div>
+ 
+<!-- Solution Manager Modal -->
+<div class="modal-overlay" id="modal-solution">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="solution-modal-title">Add Solution</h3>
+            <button class="modal-close" onclick="closeModal('modal-solution')">✕</button>
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="sol-category" placeholder="e.g. Display & Graphics" list="sol-category-list">
+            <datalist id="sol-category-list">
+                <option value="Application Issues">
+                <option value="Internet & Network">
+                <option value="Display & Graphics">
+                <option value="File & Storage">
+                <option value="System Performance">
+                <option value="Printing">
+                <option value="Login & Access">
+            </datalist>
+        </div>
+        <div class="form-group">
+            <label>Problem Title</label>
+            <input type="text" id="sol-problem" placeholder="e.g. Screen resolution is wrong">
+        </div>
+        <div class="form-group">
+            <label>Solution Summary</label>
+            <input type="text" id="sol-solution" placeholder="e.g. Adjust display settings">
+        </div>
+        <div class="form-group">
+            <label>Steps</label>
+            <div id="sol-steps-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="addSolutionStep()" style="width:auto">+ Add Step</button>
+        </div>
+        <input type="hidden" id="sol-edit-id">
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-solution')">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="saveSolution()" style="width:auto">Save Solution →</button>
+        </div>
+    </div>
+</div>
+ 
+<div class="toast-container" id="toast-container"></div>
+<script src="/frontend/js/main.js"></script>
+</body>
+</html>
