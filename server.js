@@ -17,6 +17,15 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS
   }
 });
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error('DATABASE ERROR:', err);
+    process.exit(1);
+  }
+
+  console.log('Database connected successfully');
+  connection.release();
+});
 
 // ─── MYSQL CONNECTION POOL ────────────────────────────────────────────────────
 const pool = mysql.createPool({
